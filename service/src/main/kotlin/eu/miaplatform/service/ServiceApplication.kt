@@ -22,34 +22,26 @@ import eu.miaplatform.service.controller.documentation
 import eu.miaplatform.service.controller.health
 import eu.miaplatform.service.controller.helloWorld
 import eu.miaplatform.service.model.ErrorResponse
-import io.ktor.application.Application
+import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.routing.*
-import io.ktor.application.install
-import io.ktor.jackson.jackson
+import io.ktor.jackson.*
 import io.ktor.request.*
+import io.ktor.routing.*
 import io.ktor.server.netty.*
-import io.ktor.util.KtorExperimentalAPI
 import okhttp3.logging.HttpLoggingInterceptor
 import org.slf4j.event.Level
 import java.lang.reflect.InvocationTargetException
-import java.util.*
 import kotlin.reflect.KType
 
 fun main(args: Array<String>) {
     System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, System.getenv("LOG_CONFIG_FILE"))
-    val timeZone = System.getenv("TIME_ZONE")
-    if(timeZone != null) {
-        TimeZone.setDefault(TimeZone.getTimeZone(timeZone))
-    }
     EngineMain.main(args)
 }
 
-@KtorExperimentalAPI
 fun Application.module() {
 
-    val logLevel = when (environment.config.property("ktor.log.level").getString().toUpperCase()) {
+    val logLevel = when (environment.config.property("ktor.log.level").getString().uppercase()) {
         "DEBUG" -> Level.DEBUG
         "ERROR" -> Level.ERROR
         "TRACE" -> Level.TRACE
@@ -57,7 +49,7 @@ fun Application.module() {
         else -> Level.INFO
     }
 
-    val httpLogLevel = when (environment.config.property("ktor.log.httpLogLevel").getString().toUpperCase()) {
+    val httpLogLevel = when (environment.config.property("ktor.log.httpLogLevel").getString().uppercase()) {
         "BASIC" -> HttpLoggingInterceptor.Level.BASIC
         "BODY" -> HttpLoggingInterceptor.Level.BODY
         "HEADERS" -> HttpLoggingInterceptor.Level.HEADERS
@@ -67,15 +59,17 @@ fun Application.module() {
     val additionalHeadersToProxy = System.getenv("ADDITIONAL_HEADERS_TO_PROXY") ?: ""
     val headersToProxy = HeadersToProxy(additionalHeadersToProxy)
 
-    val crudClient = RetrofitClient(basePath = "http://crud-service/", logLevel = httpLogLevel, clazz = CrudClientInterface::class.java)
+    val crudClient = RetrofitClient.build<CrudClientInterface>(
+        basePath = "http://crud-service/",
+        logLevel = httpLogLevel
+    )
 
     module(logLevel, crudClient, headersToProxy)
 }
 
-@KtorExperimentalAPI
 fun Application.module(
     logLevel: Level,
-    crudClient: RetrofitClient<CrudClientInterface>,
+    crudClient: CrudClientInterface,
     headersToProxy: HeadersToProxy
 ) {
 

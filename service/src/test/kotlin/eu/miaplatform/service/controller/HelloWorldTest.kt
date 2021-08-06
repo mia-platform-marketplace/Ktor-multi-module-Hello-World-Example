@@ -1,5 +1,8 @@
 package eu.miaplatform.service.controller
 
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.isTrue
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import eu.miaplatform.commons.client.CrudClientInterface
@@ -14,18 +17,16 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
-import io.ktor.util.KtorExperimentalAPI
 import okhttp3.logging.HttpLoggingInterceptor
 import org.junit.Test
+import org.junit.jupiter.api.TestInstance
 import org.mockserver.client.MockServerClient
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
 import org.slf4j.event.Level
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HelloWorldTest {
 
     private val objectMapper = ObjectMapper().apply {
@@ -35,10 +36,9 @@ class HelloWorldTest {
     private val port = 3000
     private var mockServer: MockServerClient = MockServerClient(host, port)
 
-    private val crudClient = RetrofitClient("http://$host:$port", HttpLoggingInterceptor.Level.NONE, CrudClientInterface::class.java)
+    private val crudClient = RetrofitClient.build<CrudClientInterface>("http://$host:$port", HttpLoggingInterceptor.Level.NONE)
 
     @Test
-    @KtorExperimentalAPI
     fun `Get should return success object message`() {
         withTestApplication({
             module (
@@ -49,7 +49,7 @@ class HelloWorldTest {
         }) {
             handleRequest(HttpMethod.Get, "/hello") {
             }.apply {
-                assertTrue { response.status()?.value == HttpStatusCode.OK.value }
+                assertThat(response.status()?.value == HttpStatusCode.OK.value).isTrue()
 
                 val expectedBody = objectMapper.writeValueAsString(
                     HelloWorldResponse(
@@ -58,13 +58,12 @@ class HelloWorldTest {
                         "Hello world!"
                     )
                 )
-                assertEquals(expectedBody, response.content)
+                assertThat(expectedBody, response.content)
             }
         }
     }
 
     @Test
-    @KtorExperimentalAPI
     fun `Get should return success object message with query parameter`() {
         withTestApplication({
             module (
@@ -75,7 +74,7 @@ class HelloWorldTest {
         }) {
             handleRequest(HttpMethod.Get, "/hello?queryParam=param") {
             }.apply {
-                assertTrue { response.status()?.value == HttpStatusCode.OK.value }
+                assertThat(response.status()?.value == HttpStatusCode.OK.value).isTrue()
 
                 val expectedBody = objectMapper.writeValueAsString(
                     HelloWorldResponse(
@@ -84,13 +83,12 @@ class HelloWorldTest {
                         "Hello world!"
                     )
                 )
-                assertEquals(expectedBody, response.content)
+                assertThat(expectedBody, response.content)
             }
         }
     }
 
     @Test
-    @KtorExperimentalAPI
     fun `Post should return success object message with path param`() {
 
         withTestApplication({
@@ -108,7 +106,7 @@ class HelloWorldTest {
                 addHeader("Content-Type", "application/json")
                 setBody(body)
             }.apply {
-                assertTrue { response.status()?.value == HttpStatusCode.OK.value }
+                assertThat(response.status()?.value == HttpStatusCode.OK.value).isTrue()
 
                 val expectedBody = objectMapper.writeValueAsString(
                     HelloWorldResponse(
@@ -117,13 +115,12 @@ class HelloWorldTest {
                         "Hello world name surname!"
                     )
                 )
-                assertEquals(expectedBody, response.content)
+                assertThat(expectedBody, response.content)
             }
         }
     }
 
     @Test
-    @KtorExperimentalAPI
     fun `Post should return bad request if body is malformed`() {
 
         withTestApplication({
@@ -141,18 +138,18 @@ class HelloWorldTest {
                 addHeader("Content-Type", "application/json")
                 setBody(body)
             }.apply {
-                assertTrue { response.status()?.value == HttpStatusCode.BadRequest.value }
+                assertThat(response.status()?.value == HttpStatusCode.BadRequest.value).isTrue()
 
                 val expectedBody = objectMapper.writeValueAsString(
+                    // if you change the package name, remember to update it in the following error or the test will fail
                     ErrorResponse(1000, "Instantiation of [simple type, class eu.miaplatform.service.model.request.HelloWorldRequestBody] value failed for JSON property surname due to missing (therefore NULL) value for creator parameter surname which is a non-nullable type\n at [Source: (InputStreamReader); line: 1, column: 15] (through reference chain: eu.miaplatform.service.model.request.HelloWorldRequestBody[\"surname\"])")
                 )
-                assertEquals(expectedBody, response.content)
+                assertThat(expectedBody).isEqualTo(response.content)
             }
         }
     }
 
     @Test
-    @KtorExperimentalAPI
     fun `Get with call should return success object message`() {
         mockServer = ClientAndServer.startClientAndServer(port)
         mockServer.setup(
@@ -171,7 +168,7 @@ class HelloWorldTest {
         }) {
             handleRequest(HttpMethod.Get, "/hello/with-call") {
             }.apply {
-                assertTrue { response.status()?.value == HttpStatusCode.OK.value }
+                assertThat(response.status()?.value == HttpStatusCode.OK.value).isTrue()
 
                 val expectedBody = objectMapper.writeValueAsString(
                     HelloWorldResponse(
@@ -180,13 +177,12 @@ class HelloWorldTest {
                         "Hello world! Book list: book1, book2"
                     )
                 )
-                assertEquals(expectedBody, response.content)
+                assertThat(expectedBody).isEqualTo(response.content)
             }
         }
     }
 
     @Test
-    @KtorExperimentalAPI
     fun `Get with call should return error if call fails`() {
         mockServer = ClientAndServer.startClientAndServer(port)
         mockServer.setup(
@@ -205,19 +201,18 @@ class HelloWorldTest {
         }) {
             handleRequest(HttpMethod.Get, "/hello/with-call") {
             }.apply {
-                assertTrue { response.status()?.value == HttpStatusCode.InternalServerError.value }
+                assertThat(response.status()?.value == HttpStatusCode.InternalServerError.value).isTrue()
 
                 val expectedBody = objectMapper.writeValueAsString(
                     ErrorResponse(1002, "books call failed")
                 )
-                assertEquals(expectedBody, response.content)
+                assertThat(expectedBody).isEqualTo(response.content)
             }
         }
         mockServer.close()
     }
 
     @Test
-    @KtorExperimentalAPI
     fun `Get with call should return success object message with query parameter`() {
         mockServer = ClientAndServer.startClientAndServer(port)
         mockServer.setup(
@@ -235,7 +230,7 @@ class HelloWorldTest {
         }) {
             handleRequest(HttpMethod.Get, "/hello/with-call?queryParam=param") {
             }.apply {
-                assertTrue { response.status()?.value == HttpStatusCode.OK.value }
+                assertThat(response.status()?.value == HttpStatusCode.OK.value).isTrue()
 
                 val expectedBody = objectMapper.writeValueAsString(
                     HelloWorldResponse(
@@ -244,7 +239,7 @@ class HelloWorldTest {
                         "Hello world! Book list: book1, book2"
                     )
                 )
-                assertEquals(expectedBody, response.content)
+                assertThat(expectedBody).isEqualTo(response.content)
             }
         }
         mockServer.close()

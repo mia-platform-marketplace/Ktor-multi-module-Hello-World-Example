@@ -1,5 +1,8 @@
 package eu.miaplatform.service.controller
 
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.isTrue
 import com.fasterxml.jackson.databind.ObjectMapper
 import eu.miaplatform.commons.StatusService
 import eu.miaplatform.commons.client.CrudClientInterface
@@ -12,19 +15,15 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.handleRequest
 import org.junit.Test
 import io.ktor.server.testing.withTestApplication
-import io.ktor.util.KtorExperimentalAPI
 import okhttp3.logging.HttpLoggingInterceptor
 import org.slf4j.event.Level
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class HealthTest {
     private val objectMapper = ObjectMapper()
 
-    private val crudClient = RetrofitClient("http://crud-url", HttpLoggingInterceptor.Level.NONE, CrudClientInterface::class.java)
+    private val crudClient = RetrofitClient.build<CrudClientInterface>("http://crud-url", HttpLoggingInterceptor.Level.NONE)
 
     @Test
-    @KtorExperimentalAPI
     fun `Health should return OK`() {
         withTestApplication({
             module (
@@ -36,18 +35,17 @@ class HealthTest {
             handleRequest(HttpMethod.Get, "/-/healthz") {
 
             }.apply {
-                assertTrue { response.status()?.value == HttpStatusCode.OK.value }
+                assertThat(response.status()?.value == HttpStatusCode.OK.value).isTrue()
 
                 val version = StatusService().getVersion()
                 val body = objectMapper.readValue(response.content, HealthBodyResponse::class.java)
                 val expectedRes = HealthBodyResponse("service-api", version, HealthBodyResponse.Status.OK.value)
-                assertEquals(expectedRes, body)
+                assertThat(expectedRes).isEqualTo(body)
             }
         }
     }
 
     @Test
-    @KtorExperimentalAPI
     fun `Ready should return OK`() {
         withTestApplication({
             module (
@@ -59,19 +57,18 @@ class HealthTest {
             handleRequest(HttpMethod.Get, "/-/ready") {
 
             }.apply {
-                assertTrue { response.status()?.value == HttpStatusCode.OK.value }
+                assertThat(response.status()?.value == HttpStatusCode.OK.value).isTrue()
 
                 val version = StatusService().getVersion()
                 val body = objectMapper.readValue(response.content, HealthBodyResponse::class.java)
                 val expectedRes = HealthBodyResponse("service-api", version, HealthBodyResponse.Status.OK.value)
-                assertEquals(expectedRes, body)
+                assertThat(expectedRes).isEqualTo(body)
             }
         }
 
     }
 
     @Test
-    @KtorExperimentalAPI
     fun `Check Up should return OK`() {
         withTestApplication({
             module (
@@ -83,12 +80,12 @@ class HealthTest {
             handleRequest(HttpMethod.Get, "/-/check-up") {
 
             }.apply {
-                assertTrue { response.status()?.value == HttpStatusCode.OK.value }
+                assertThat(response.status()?.value == HttpStatusCode.OK.value).isTrue()
 
                 val version = StatusService().getVersion()
                 val body = objectMapper.readValue(response.content, HealthBodyResponse::class.java)
                 val expectedRes = HealthBodyResponse("service-api", version, HealthBodyResponse.Status.OK.value)
-                assertEquals(expectedRes, body)
+                assertThat(expectedRes).isEqualTo(body)
             }
         }
 

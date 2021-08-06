@@ -3,3 +3,9 @@ rootProject.name = 'ktor-gradle-template'
 include('commons')
 include('service')
 
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' } // for papsign ktor open api generator
+    }
+}

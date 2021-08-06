@@ -19,7 +19,7 @@ import eu.miaplatform.service.model.response.HelloWorldResponse
 import io.ktor.application.Application
 import kotlinx.coroutines.async
 
-fun helloWorld(application: Application, crudClient: RetrofitClient<CrudClientInterface>, headersToProxy: HeadersToProxy) {
+fun helloWorld(application: Application, crudClient: CrudClientInterface, headersToProxy: HeadersToProxy) {
 
     application.apiRouting {
         route("/hello") {
@@ -56,7 +56,7 @@ fun helloWorld(application: Application, crudClient: RetrofitClient<CrudClientIn
 
                     val headers = headersToProxy.proxy(this.pipeline.context)
                     val booksCall = application.async {
-                        crudClient.getRestClient().getBooks(headers)
+                        crudClient.getBooks(headers)
                     }
 
                     val books = try {

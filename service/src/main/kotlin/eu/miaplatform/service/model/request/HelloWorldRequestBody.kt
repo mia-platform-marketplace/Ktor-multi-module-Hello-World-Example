@@ -2,7 +2,7 @@ package eu.miaplatform.service.model.request
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class HelloWorldRequestBody (
+data class HelloWorldRequestBody (
     @JsonProperty("name")
     @get:JsonProperty("name")
     val name: String,

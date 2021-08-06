@@ -1,46 +1,21 @@
+/**
+ * As best practice, define here all plugins with their version and `apply false` and reuse them in submodules.
+ * Also, each module shall import its dependencies separately.
+ */
+
 plugins {
-    id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.3.72'
+    id('org.jetbrains.kotlin.jvm') version "$kotlin_version" apply false
+
+    // Apply to all projects, used to check unused dependencies, run `./gradlew lintGradle` to check dependencies.
+    // Be aware that automatic fixing with `fixLintGradle` might break something.
+    id('nebula.lint') version "17.1.0"
 }
 
+// Do not add dependencies here! Bad practice
 allprojects {
-
     group 'eu.miaplatform'
-    version '0.0.1'
-
-    repositories {
-        mavenCentral()
-        jcenter()
-        maven { url 'https://www.jitpack.io' }
-    }
-
-
-    apply plugin: 'java'
-    apply plugin: 'kotlin'
-    apply plugin: 'org.jetbrains.kotlin.jvm'
-
-    sourceCompatibility = 1.8
-
-    compileKotlin {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-    compileTestKotlin {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-
-    dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-
-        testCompile group: 'junit', name: 'junit', version: '4.12'
-        testCompile "org.junit.jupiter:junit-jupiter-api:5.4.2"
-        testCompile "org.junit.jupiter:junit-jupiter-params:5.4.2"
-        testCompile group: 'com.squareup.okhttp', name: 'mockwebserver', version: '2.7.5'
-        testCompile "io.ktor:ktor-server-tests:$ktor_version"
-        testCompile "com.squareup.retrofit2:retrofit-mock:2.9.0"
-        testCompile "org.powermock:powermock-module-junit4:2.0.2"
-        testCompile "org.powermock:powermock-api-mockito2:2.0.2"
-        testCompile 'org.mock-server:mockserver-netty:5.5.4'
-    }
+    gradleLint.rules = ['all-dependency']
+    gradleLint.alwaysRun = false
 }
 
 class UpdateVersion extends DefaultTask {

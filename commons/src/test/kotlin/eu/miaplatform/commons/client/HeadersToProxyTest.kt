@@ -1,9 +1,10 @@
 package eu.miaplatform.commons.client
 
+import assertk.assertThat
+import assertk.assertions.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import org.junit.Test
-import kotlin.test.assertEquals
 
 class HeadersToProxyTest {
 
@@ -18,7 +19,7 @@ class HeadersToProxyTest {
             }.apply {
                 val headers = headersToProxy.proxy(this)
 
-                assertEquals(mapOf(), headers)
+                assertThat(mapOf<String, String>()).isEqualTo(headers)
             }
         }
     }
@@ -35,7 +36,7 @@ class HeadersToProxyTest {
             }.apply {
                 val headers = headersToProxy.proxy(this)
 
-                assertEquals(mapOf("x-request-id" to "1234abcd"), headers)
+                assertThat(mapOf("x-request-id" to "1234abcd")).isEqualTo(headers)
             }
         }
     }
@@ -52,7 +53,7 @@ class HeadersToProxyTest {
             }.apply {
                 val headers = headersToProxy.proxy(this)
 
-                assertEquals(mapOf("miauserid" to "userid"), headers)
+                assertThat(mapOf("miauserid" to "userid")).isEqualTo(headers)
             }
         }
     }
@@ -69,7 +70,7 @@ class HeadersToProxyTest {
             }.apply {
                 val headers = headersToProxy.proxy(this)
 
-                assertEquals(mapOf("miausergroups" to "group"), headers)
+                assertThat(mapOf("miausergroups" to "group")).isEqualTo(headers)
             }
         }
     }
@@ -86,7 +87,7 @@ class HeadersToProxyTest {
             }.apply {
                 val headers = headersToProxy.proxy(this)
 
-                assertEquals(mapOf("client-type" to "type"), headers)
+                assertThat(mapOf("client-type" to "type")).isEqualTo(headers)
             }
         }
     }
@@ -103,7 +104,7 @@ class HeadersToProxyTest {
             }.apply {
                 val headers = headersToProxy.proxy(this)
 
-                assertEquals(mapOf("isbackoffice" to "true"), headers)
+                assertThat(mapOf("isbackoffice" to "true")).isEqualTo(headers)
             }
         }
     }
@@ -120,7 +121,7 @@ class HeadersToProxyTest {
             }.apply {
                 val headers = headersToProxy.proxy(this)
 
-                assertEquals(mapOf("miauserproperties" to "property"), headers)
+                assertThat(mapOf("miauserproperties" to "property")).isEqualTo(headers)
             }
         }
     }
@@ -142,7 +143,7 @@ class HeadersToProxyTest {
             }.apply {
                 val headers = headersToProxy.proxy(this)
 
-                assertEquals(
+                assertThat(
                     mapOf(
                         "x-request-id" to "1234abcd",
                         "miauserid" to "userid",
@@ -150,7 +151,7 @@ class HeadersToProxyTest {
                         "miauserproperties" to "property",
                         "client-type" to "type",
                         "miauserproperties" to "property"
-                    ), headers)
+                    )).isEqualTo(headers)
             }
         }
     }
@@ -173,7 +174,7 @@ class HeadersToProxyTest {
             }.apply {
                 val headers = headersToProxy.proxy(this)
 
-                assertEquals(
+                assertThat(
                     mapOf(
                         "x-request-id" to "1234abcd",
                         "miauserid" to "userid",
@@ -181,7 +182,7 @@ class HeadersToProxyTest {
                         "miauserproperties" to "property",
                         "client-type" to "type",
                         "miauserproperties" to "property"
-                    ), headers)
+                    )).isEqualTo(headers)
             }
         }
     }
@@ -205,7 +206,7 @@ class HeadersToProxyTest {
                 val headers = headersToProxy.proxy(this)
 
                 System.getProperty("ADDITIONAL_HEADERS_TO_PROXY", "some-other-header-to-proxy")
-                assertEquals(
+                assertThat(
                     mapOf(
                         "x-request-id" to "1234abcd",
                         "miauserid" to "userid",
@@ -214,7 +215,7 @@ class HeadersToProxyTest {
                         "client-type" to "type",
                         "miauserproperties" to "property",
                         "some-other-header-to-proxy" to "other"
-                    ), headers)
+                    )).isEqualTo(headers)
             }
         }
     }
